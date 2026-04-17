@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class EnrolmentProcess extends Thread {
 
@@ -27,7 +25,12 @@ public class EnrolmentProcess extends Thread {
 
     public void run() {
         // to simulate the work of the student enrolment process, I have been asked to simply put the Thread to sleep for the specified burst time
-        Thread.sleep(burstTime);
+        try {
+            Thread.sleep(burstTime);            
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
     }
 
 }

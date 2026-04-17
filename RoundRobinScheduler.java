@@ -4,56 +4,51 @@ import java.util.Queue;
 
 public class RoundRobinScheduler extends Thread { 
 
-Queue<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>(); // creating the queue linked list of enrolment processes
+    LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
 
-public enqueue(EnrolmentProcess x) {
+    public RoundRobinScheduler() {
+        // empty
+    }
 
-    queue.addFirst(x);
-
-}
-
-public dequeue(EnrolmentProcess x, LinkedList y) {
-
-    y.addLast(x);
-    y.remove()
-
-}
-
-    public startEnrolment() { // function to start the enrolment processes
-
-        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>(); // creating the linked list of completed processes called 'completed'
-
-        Thread.state currentState = getState(queue[0]); // making the current state a variable to shorten the code I have to write within the if statements
-
-        if (currentState == 'NEW') {
-
-            queue[0].run();
-            
-            dequeue(queue[0], queue);
-
+    public static void main(String[] args) {
+        try {
+            RoundRobinScheduler scheduler = new RoundRobinScheduler();
+            // add processes, start the scheduler etc.
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
-        else if (currentState == 'TERMINATED') {
+    public void enqueue(EnrolmentProcess x) {
+        queue.addFirst(x);
+    }
 
-            dequeue(queue[0], completed);
-            
+    public void dequeue(EnrolmentProcess x, LinkedList y) {
+        y.addLast(x);
+        y.remove();
+    }
+
+    public void startEnrolment() {
+
+        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>();
+
+        Thread.State currentState = queue.peek().getState();
+
+        if (currentState == Thread.State.NEW) {
+            queue.peek().run();
+            dequeue(queue.peek(), queue);
         }
-
+        else if (currentState == Thread.State.TERMINATED) {
+            dequeue(queue.peek(), completed);
+        }
         else {
-
-            interrupt(queue[0]);
-
-            queue[0].run();
-
-            dequeue(queue[0], queue);
-
+            queue.peek().interrupt();
+            queue.peek().run();
+            dequeue(queue.peek(), queue);
         }
 
         if (queue.isEmpty()) {
-
-           // completed.printList(); implement later
-
-
+            // completed.printList(); implement later
+        }
     }
-}
 }
