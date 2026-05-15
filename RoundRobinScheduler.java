@@ -4,6 +4,8 @@ import java.util.Queue;
 
 public class RoundRobinScheduler extends Thread { 
 
+    private static final int QUANTUM = 500;
+
     LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
 
     public RoundRobinScheduler() {
@@ -14,41 +16,52 @@ public class RoundRobinScheduler extends Thread {
         try {
             RoundRobinScheduler scheduler = new RoundRobinScheduler();
             // add processes, start the scheduler etc.
+
+        // Reads the CSV
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void enqueue(EnrolmentProcess x) {
-        queue.addFirst(x);
+        queue.addLast(x);
     }
 
-    public void dequeue(EnrolmentProcess x, LinkedList y) {
-        y.addLast(x);
-        y.remove();
+    public EnrolmentProcess dequeue() {
+        return queue.removeFirst();
     }
+
 
     public void startEnrolment() {
 
-        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>();
+        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>(); // Makes a new linked list called completed
 
-        Thread.State currentState = queue.peek().getState();
+        while (!queue.isEmpty()) {
 
-        if (currentState == Thread.State.NEW) {
-            queue.peek().run();
-            dequeue(queue.peek(), queue);
-        }
-        else if (currentState == Thread.State.TERMINATED) {
-            dequeue(queue.peek(), completed);
-        }
-        else {
-            queue.peek().interrupt();
-            queue.peek().run();
-            dequeue(queue.peek(), queue);
+            EnrolmentProcess current = dequeue(); // removes the enrolment process from the front of the queue
+            Thread.State currentState = current.getState();
+
+            if (currentState == Thread.State.NEW) {
+                current.start();
+            } else if (currentState == Thread.State.TERMINATED) {
+                completed.addLast(current);
+                continue;
+            } else {
+                current.interrupt();
+            }
+
+            try {
+                Thread.sleep(QUANTUM);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            if (current.getState() == Thread.State.TERMINATED) {
+                completed.addLast(current);
+            } else {
+                enqueue(current); // puts it back to the end
+            }
         }
 
-        if (queue.isEmpty()) {
-            // completed.printList(); implement later
-        }
     }
 }

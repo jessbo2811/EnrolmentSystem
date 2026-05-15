@@ -1,5 +1,4 @@
 process_id,burst_time,priority
- process_id,burst_time,priority
 P1, 7500, 5
 P2, 500, 10
 P3, 5000, 9
