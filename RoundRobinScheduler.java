@@ -23,8 +23,8 @@ public class RoundRobinScheduler extends Thread {
         }
     }
 
-    public void enqueue(EnrolmentProcess x) {
-        queue.addLast(x);
+    public void enqueue(EnrolmentProcess process) {
+        queue.addLast(process);
     }
 
     public EnrolmentProcess dequeue() {
