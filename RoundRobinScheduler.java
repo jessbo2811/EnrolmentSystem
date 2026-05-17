@@ -1,10 +1,11 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
-public class RoundRobinScheduler extends Thread { 
+public class RoundRobinScheduler extends Thread {
 
     private static final int QUANTUM = 500;
+    private static final String COMMA_DELIMITER = ",";
 
     LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
 
@@ -15,9 +16,24 @@ public class RoundRobinScheduler extends Thread {
     public static void main(String[] args) {
         try {
             RoundRobinScheduler scheduler = new RoundRobinScheduler();
-            // add processes, start the scheduler etc.
 
-        // Reads the CSV
+            BufferedReader br = new BufferedReader(new FileReader("enrol.csv"));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("process_id")) continue;
+
+                String[] values = line.split(COMMA_DELIMITER);
+                String processId = values[0].trim();
+                int burstTime = Integer.parseInt(values[1].trim());
+                int priority = Integer.parseInt(values[2].trim());
+
+                EnrolmentProcess process = new EnrolmentProcess(processId, burstTime, priority);
+                scheduler.enqueue(process);
+            }
+            br.close();
+
+            scheduler.startEnrolment();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -31,21 +47,21 @@ public class RoundRobinScheduler extends Thread {
         return queue.removeFirst();
     }
 
-
     public void startEnrolment() {
 
-        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>(); // Makes a new linked list called completed
+        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>();
 
         while (!queue.isEmpty()) {
 
-            EnrolmentProcess current = dequeue(); // removes the enrolment process from the front of the queue
-            Thread.State currentState = current.getState();
+            EnrolmentProcess current = dequeue();
 
-            if (currentState == Thread.State.NEW) {
-                current.start();
-            } else if (currentState == Thread.State.TERMINATED) {
+            if (current.remainingTime <= 0) {
                 completed.addLast(current);
                 continue;
+            }
+
+            if (current.getState() == Thread.State.NEW) {
+                current.start();
             } else {
                 current.interrupt();
             }
@@ -56,12 +72,16 @@ public class RoundRobinScheduler extends Thread {
                 Thread.currentThread().interrupt();
             }
 
-            if (current.getState() == Thread.State.TERMINATED) {
+            current.remainingTime -= QUANTUM;
+
+            if (current.remainingTime <= 0) {
                 completed.addLast(current);
+                System.out.println(current.processId + " completed.");
             } else {
-                enqueue(current); // puts it back to the end
+                enqueue(current);
             }
         }
 
+        System.out.println("All processes completed.");
     }
 }
