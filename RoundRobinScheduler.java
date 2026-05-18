@@ -55,7 +55,7 @@ public class RoundRobinScheduler extends Thread {
 
             EnrolmentProcess current = dequeue();
 
-            if (current.remainingTime <= 0) {
+            if (current.getRemainingTime() <= 0) {
                 completed.addLast(current);
                 continue;
             }
@@ -72,9 +72,10 @@ public class RoundRobinScheduler extends Thread {
                 Thread.currentThread().interrupt();
             }
 
-            current.remainingTime -= QUANTUM;
+            int newRemainingTime = current.getRemainingTime() - QUANTUM;
+            current.setRemainingTime(newRemainingTime);
 
-            if (current.remainingTime <= 0) {
+            if (current.getRemainingTime() <= 0) {
                 completed.addLast(current);
                 System.out.println(current.processId + " completed.");
             } else {
