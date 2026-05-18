@@ -7,7 +7,7 @@ public class RoundRobinScheduler extends Thread {
     private static final int QUANTUM = 500;
     private static final String COMMA_DELIMITER = ",";
 
-    LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
+    private LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
 
     public RoundRobinScheduler() {
         // empty

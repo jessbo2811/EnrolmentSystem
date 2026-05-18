@@ -3,7 +3,7 @@ public class EnrolmentProcess extends Thread {
     String processId;
     int burstTime;
     int priority;
-    int remainingTime;
+    private int remainingTime;
 
     public EnrolmentProcess(String id, int burstTime, int priority) {
         this.processId = id;
