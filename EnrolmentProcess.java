@@ -4,6 +4,7 @@ public class EnrolmentProcess extends Thread {
     int burstTime;
     int priority;
     private int remainingTime;
+    long startTime = 0;
 
     public EnrolmentProcess(String id, int burstTime, int priority) {
         this.processId = id;
@@ -26,6 +27,10 @@ public class EnrolmentProcess extends Thread {
 
     public void setRemainingTime(int remainingTime) {
         this.remainingTime = remainingTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
 }

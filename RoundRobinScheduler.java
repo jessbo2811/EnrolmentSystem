@@ -62,6 +62,7 @@ public class RoundRobinScheduler extends Thread {
 
             if (current.getState() == Thread.State.NEW) {
                 current.start();
+                current.setStartTime(System.currentTimeMillis());
             } else if (current.getState() == Thread.State.TERMINATED) {
             } else {
                 current.interrupt();
@@ -78,8 +79,10 @@ public class RoundRobinScheduler extends Thread {
 
             if (current.getRemainingTime() <= 0) {
                 completed.addLast(current);
+                long endTime = System.currentTimeMillis();
                 System.out.println("ID: " + current.processId);
-                System.out.println("Time Taken: " + (current.burstTime));
+                System.out.println("Burst Time: " + current.burstTime);
+                System.out.println("Time Taken: " + (endTime - current.startTime));
                 System.out.println("Process Completed!");
             } else {
                 enqueue(current);
