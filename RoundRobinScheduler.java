@@ -1,6 +1,6 @@
-import java.util.LinkedList;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.LinkedList;
 
 public class RoundRobinScheduler extends Thread {
 
@@ -78,7 +78,9 @@ public class RoundRobinScheduler extends Thread {
 
             if (current.getRemainingTime() <= 0) {
                 completed.addLast(current);
-                System.out.println(current.processId + " completed.");
+                System.out.println("ID: " + current.processId);
+                System.out.println("Time Taken: " + (current.burstTime));
+                System.out.println("Process Completed!");
             } else {
                 enqueue(current);
             }
