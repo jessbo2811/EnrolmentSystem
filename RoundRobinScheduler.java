@@ -62,6 +62,7 @@ public class RoundRobinScheduler extends Thread {
 
             if (current.getState() == Thread.State.NEW) {
                 current.start();
+            } else if (current.getState() == Thread.State.TERMINATED) {
             } else {
                 current.interrupt();
             }
