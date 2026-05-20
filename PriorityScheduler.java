@@ -11,7 +11,7 @@ public class PriorityScheduler extends Thread {
     private LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
 
     public PriorityScheduler() {
-        // empty
+        
     }
 
     public static void main(String[] args) {
