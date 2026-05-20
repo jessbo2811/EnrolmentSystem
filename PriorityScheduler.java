@@ -16,7 +16,7 @@ public class PriorityScheduler extends Thread {
 
     public static void main(String[] args) {
         try {
-            RoundRobinScheduler scheduler = new RoundRobinScheduler();
+            PriorityScheduler scheduler = new PriorityScheduler();
 
             BufferedReader br = new BufferedReader(new FileReader("enrol.csv"));
             String line;
