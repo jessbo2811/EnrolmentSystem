@@ -33,4 +33,8 @@ public class EnrolmentProcess extends Thread {
         this.startTime = startTime;
     }
 
+    public int getProcessPriority() {
+        return this.priority;
+    }
+
 }

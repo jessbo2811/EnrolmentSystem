@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.LinkedList;
+import java.util.Comparator;
 
 public class PriorityScheduler extends Thread {
 
@@ -29,6 +30,7 @@ public class PriorityScheduler extends Thread {
                 int priority = Integer.parseInt(values[2].trim());
 
                 EnrolmentProcess process = new EnrolmentProcess(processId, burstTime, priority);
+
                 scheduler.enqueue(process);
             }
             br.close();
@@ -45,7 +47,7 @@ public class PriorityScheduler extends Thread {
     }
 
     public EnrolmentProcess dequeue() {
-        return queue.removeFirst();
+        return queue.poll();
     }
 
     public void startEnrolment() {
@@ -55,6 +57,7 @@ public class PriorityScheduler extends Thread {
         while (!queue.isEmpty()) {
 
             EnrolmentProcess current = dequeue();
+            queue.sort(Comparator.comparing(EnrolmentProcess::current.priority));
 
             if (current.getRemainingTime() <= 0) {
                 completed.addLast(current);
