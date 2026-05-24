@@ -55,10 +55,8 @@ public class PriorityScheduler extends Thread {
         LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>();
 
         while (!queue.isEmpty()) {
-
+            queue.sort(Comparator.comparing(EnrolmentProcess::getProcessPriority));
             EnrolmentProcess current = dequeue();
-            queue.sort(Comparator.comparing(EnrolmentProcess::current.priority));
-
             if (current.getRemainingTime() <= 0) {
                 completed.addLast(current);
                 continue;
@@ -87,6 +85,7 @@ public class PriorityScheduler extends Thread {
                 System.out.println("ID: " + current.processId);
                 System.out.println("Burst Time: " + current.burstTime);
                 System.out.println("Time Taken: " + (endTime - current.startTime));
+                System.out.println("Process Priority: " + current.getProcessPriority());
                 System.out.println("Process Completed!");
             } else {
                 enqueue(current);
