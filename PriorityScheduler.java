@@ -12,9 +12,9 @@ public class PriorityScheduler extends Thread {
     private PriorityQueue<EnrolmentProcess> queue;
 
     public PriorityScheduler() {
-        Comparator<EnrolmentProcess> c = (s1, s2) -> {
-            if (s1.getProcessPriority() < s2.getProcessPriority()) return -1;
-            if (s1.getProcessPriority() > s2.getProcessPriority()) return 1;
+        Comparator<EnrolmentProcess> c = (pr1, pr2) -> {
+            if (pr1.getProcessPriority() < pr2.getProcessPriority()) return -1;
+            if (pr1.getProcessPriority() > pr2.getProcessPriority()) return 1;
             return -1;
         };
         queue = new PriorityQueue<>(c);
