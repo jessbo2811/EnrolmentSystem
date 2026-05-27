@@ -7,7 +7,8 @@ public class MLFQScheduler extends Thread {
     private static final int QUANTUM = 500;
     private static final String COMMA_DELIMITER = ",";
 
-    private LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
+    private LinkedList<EnrolmentProcess> youngList = new LinkedList<EnrolmentProcess>();
+    private LinkedList<EnrolmentProcess> oldList = new LinkedList<EnrolmentProcess>();
 
     public MLFQScheduler() {
         // empty
@@ -28,7 +29,7 @@ public class MLFQScheduler extends Thread {
                 int priority = Integer.parseInt(values[2].trim());
 
                 EnrolmentProcess process = new EnrolmentProcess(processId, burstTime, priority);
-                scheduler.enqueue(process);
+                scheduler.enqueueYoung(process);
             }
             br.close();
 
@@ -39,55 +40,99 @@ public class MLFQScheduler extends Thread {
         }
     }
 
-    public void enqueue(EnrolmentProcess process) {
-        queue.addLast(process);
+    public void enqueueYoung(EnrolmentProcess process) {
+        youngList.addLast(process);
+    }    
+    public void enqueueOld(EnrolmentProcess process) {
+        oldList.addLast(process);
     }
 
-    public EnrolmentProcess dequeue() {
-        return queue.removeFirst();
+    public EnrolmentProcess dequeueYoung() {
+        return youngList.removeFirst();
+    }
+    public EnrolmentProcess dequeueOld() {
+        return oldList.removeFirst();
     }
 
     public void startEnrolment() {
 
         LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>();
 
-        while (!queue.isEmpty()) {
+        while (!youngList.isEmpty() && !oldList.isEmpty()) {
+            if (!youngList.isEmpty()){
+                EnrolmentProcess current = dequeueYoung();
 
-            EnrolmentProcess current = dequeue();
+                if (current.getRemainingTime() <= 0) {
+                    completed.addLast(current);
+                    continue;
+                }
 
-            if (current.getRemainingTime() <= 0) {
-                completed.addLast(current);
-                continue;
+                if (current.getState() == Thread.State.NEW) {
+                    current.start();
+                    current.setStartTime(System.currentTimeMillis());
+                } else if (current.getState() == Thread.State.TERMINATED) {
+                } else {
+                    current.interrupt();
+                }
+
+                try {
+                    Thread.sleep(QUANTUM);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                int newRemainingTime = current.getRemainingTime() - QUANTUM;
+                current.setRemainingTime(newRemainingTime);
+
+                if (current.getRemainingTime() <= 0) {
+                    completed.addLast(current);
+                    long endTime = System.currentTimeMillis();
+                    System.out.println("ID: " + current.processId);
+                    System.out.println("Burst Time: " + current.burstTime);
+                    System.out.println("Time Taken: " + (endTime - current.startTime));
+                    System.out.println("Process Completed!");
+                } else {
+                    enqueueOld(current);
+                }
             }
+            else{
+                EnrolmentProcess currentOld = dequeueOld();
 
-            if (current.getState() == Thread.State.NEW) {
-                current.start();
-                current.setStartTime(System.currentTimeMillis());
-            } else if (current.getState() == Thread.State.TERMINATED) {
-            } else {
-                current.interrupt();
-            }
+                if (currentOld.getRemainingTime() <= 0) {
+                    completed.addLast(currentOld);
+                    continue;
+                }
 
-            try {
-                Thread.sleep(QUANTUM);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                if (currentOld.getState() == Thread.State.NEW) {
+                    currentOld.start();
+                    currentOld.setStartTime(System.currentTimeMillis());
+                } else if (current.getState() == Thread.State.TERMINATED) {
+                } else {
+                    currentOld.interrupt();
+                }
 
-            int newRemainingTime = current.getRemainingTime() - QUANTUM;
-            current.setRemainingTime(newRemainingTime);
+                try {
+                    Thread.sleep(QUANTUM);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
 
-            if (current.getRemainingTime() <= 0) {
-                completed.addLast(current);
-                long endTime = System.currentTimeMillis();
-                System.out.println("ID: " + current.processId);
-                System.out.println("Burst Time: " + current.burstTime);
-                System.out.println("Time Taken: " + (endTime - current.startTime));
-                System.out.println("Process Completed!");
-            } else {
-                enqueue(current);
+                int newRemainingTime = currentOld.getRemainingTime() - QUANTUM;
+                currentOld.setRemainingTime(newRemainingTime);
+
+                if (currentOld.getRemainingTime() <= 0) {
+                    completed.addLast(currentOld);
+                    long endTime = System.currentTimeMillis();
+                    System.out.println("ID: " + currentOld.processId);
+                    System.out.println("Burst Time: " + currentOld.burstTime);
+                    System.out.println("Time Taken: " + (endTime - currentOld.startTime));
+                    System.out.println("Process Completed!");
+                } else {
+                    enqueueYoung(currentOld);
+                }
             }
         }
+
 
         System.out.println("All processes completed.");
     }
