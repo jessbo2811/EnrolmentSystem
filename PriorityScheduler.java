@@ -1,18 +1,23 @@
-import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.LinkedList;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
 
 public class PriorityScheduler extends Thread {
 
     private static final int QUANTUM = 500;
     private static final String COMMA_DELIMITER = ",";
 
-    private LinkedList<EnrolmentProcess> queue = new LinkedList<EnrolmentProcess>();
+    private PriorityQueue<EnrolmentProcess> queue;
 
     public PriorityScheduler() {
-        
+        Comparator<EnrolmentProcess> c = (s1, s2) -> {
+            if (s1.getProcessPriority() < s2.getProcessPriority()) return -1;
+            if (s1.getProcessPriority() > s2.getProcessPriority()) return 1;
+            return -1;
+        };
+        queue = new PriorityQueue<>(c);
     }
 
     public static void main(String[] args) {
@@ -43,29 +48,32 @@ public class PriorityScheduler extends Thread {
     }
 
     public void enqueue(EnrolmentProcess process) {
-        queue.addLast(process);
+        queue.add(process);
     }
 
     public EnrolmentProcess dequeue() {
         return queue.poll();
     }
 
-    public void startEnrolment() {
-
-        LinkedList<EnrolmentProcess> completed = new LinkedList<EnrolmentProcess>();
+    public LinkedList<EnrolmentProcess> startEnrolment() {
+        LinkedList<EnrolmentProcess> completed = new LinkedList<>();
 
         while (!queue.isEmpty()) {
-            queue.sort(Comparator.comparing(EnrolmentProcess::getProcessPriority));
-            EnrolmentProcess current = dequeue();
-            if (current.getRemainingTime() <= 0) {
-                completed.addLast(current);
-                continue;
-            }
+            EnrolmentProcess current = queue.poll();
 
-            if (current.getState() == Thread.State.NEW) {
+            Thread.State state = current.getState();
+
+            if (state == Thread.State.NEW) {
                 current.start();
                 current.setStartTime(System.currentTimeMillis());
-            } else if (current.getState() == Thread.State.TERMINATED) {
+            } else if (state == Thread.State.TERMINATED) {
+                long endTime = System.currentTimeMillis();
+                System.out.println("ID: " + current.processId);
+                System.out.println("Status: COMPLETE");
+                System.out.println("Burst Time: " + current.burstTime);
+                System.out.println("Time Taken: " + (endTime - current.startTime));
+                completed.addLast(current);
+                continue;
             } else {
                 current.interrupt();
             }
@@ -76,22 +84,10 @@ public class PriorityScheduler extends Thread {
                 Thread.currentThread().interrupt();
             }
 
-            int newRemainingTime = current.getRemainingTime() - QUANTUM;
-            current.setRemainingTime(newRemainingTime);
-
-            if (current.getRemainingTime() <= 0) {
-                completed.addLast(current);
-                long endTime = System.currentTimeMillis();
-                System.out.println("ID: " + current.processId);
-                System.out.println("Burst Time: " + current.burstTime);
-                System.out.println("Time Taken: " + (endTime - current.startTime));
-                System.out.println("Process Priority: " + current.getProcessPriority());
-                System.out.println("Process Completed!");
-            } else {
-                enqueue(current);
-            }
+            queue.add(current);
         }
 
         System.out.println("All processes completed.");
+        return completed;
     }
 }

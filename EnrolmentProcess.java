@@ -14,10 +14,13 @@ public class EnrolmentProcess extends Thread {
     }
 
     public void run() {
-        try {
-            Thread.sleep(burstTime);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        int remaining = burstTime;
+        while (remaining > 0) {
+            try {
+                Thread.sleep(20);
+                remaining -= 20;
+            } catch (InterruptedException e) {
+            }
         }
     }
 
