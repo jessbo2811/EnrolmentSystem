@@ -106,7 +106,7 @@ public class MLFQScheduler extends Thread {
                 if (currentOld.getState() == Thread.State.NEW) {
                     currentOld.start();
                     currentOld.setStartTime(System.currentTimeMillis());
-                } else if (current.getState() == Thread.State.TERMINATED) {
+                } else if (currentOld.getState() == Thread.State.TERMINATED) {
                 } else {
                     currentOld.interrupt();
                 }
